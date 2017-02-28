@@ -10,6 +10,7 @@ const suite = new Benchmark.Suite();
 
 const buf_1 = fs.readFileSync(path.join(__dirname, '../test/fixtures/dubbo_req.bin'));
 const buf_2 = fs.readFileSync(path.join(__dirname, '../test/fixtures/dubbo_req_java_class.bin'));
+const total = buf_1.length + buf_2.length;
 
 assert.deepEqual(Buffer.concat([buf_1, buf_2]), utils.concatBuffer(buf_1, buf_2));
 
@@ -17,6 +18,9 @@ assert.deepEqual(Buffer.concat([buf_1, buf_2]), utils.concatBuffer(buf_1, buf_2)
 suite
   .add('Buffer.concat()', function() {
     Buffer.concat([buf_1, buf_2]);
+  })
+  .add('Buffer.concat() with size', function() {
+    Buffer.concat([buf_1, buf_2], total);
   })
   .add('Buffer.copy()', function() {
     utils.concatBuffer(buf_1, buf_2);

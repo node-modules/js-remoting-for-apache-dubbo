@@ -10,12 +10,12 @@ dubbo remoting
 
 [npm-image]: https://img.shields.io/npm/v/dubbo-remoting.svg?style=flat-square
 [npm-url]: https://npmjs.org/package/dubbo-remoting
-[travis-image]: https://img.shields.io/travis/node-modules/dubbo-remoting.svg?style=flat-square
-[travis-url]: https://travis-ci.org/node-modules/dubbo-remoting
-[codecov-image]: https://codecov.io/gh/node-modules/dubbo-remoting/branch/master/graph/badge.svg
-[codecov-url]: https://codecov.io/gh/node-modules/dubbo-remoting
-[david-image]: https://img.shields.io/david/node-modules/dubbo-remoting.svg?style=flat-square
-[david-url]: https://david-dm.org/node-modules/dubbo-remoting
+[travis-image]: https://img.shields.io/travis/dubbo-js/dubbo-remoting.svg?style=flat-square
+[travis-url]: https://travis-ci.org/dubbo-js/dubbo-remoting
+[codecov-image]: https://codecov.io/gh/dubbo-js/dubbo-remoting/branch/master/graph/badge.svg
+[codecov-url]: https://codecov.io/gh/dubbo-js/dubbo-remoting
+[david-image]: https://img.shields.io/david/dubbo-js/dubbo-remoting.svg?style=flat-square
+[david-url]: https://david-dm.org/dubbo-js/dubbo-remoting
 [snyk-image]: https://snyk.io/test/npm/dubbo-remoting/badge.svg?style=flat-square
 [snyk-url]: https://snyk.io/test/npm/dubbo-remoting
 [download-image]: https://img.shields.io/npm/dm/dubbo-remoting.svg?style=flat-square

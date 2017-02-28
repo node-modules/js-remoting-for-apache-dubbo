@@ -12,7 +12,7 @@ const Invocation = require('./lib/protocol/dubbo/invocation');
  * @param {String} url - the url
  * @return {DubboDecoder} decoder
  */
-exports.decode = url => {
+exports.decoder = url => {
   return new DubboDecoder({ url });
 };
 

@@ -23,17 +23,60 @@ dubbo remoting
 
 ## Introduction
 
-dubbo protocol nodejs implement
+[Dubbo](http://dubbo.io/) Protocol Nodejs Implement
+
+- Common Exchange Packet
 
 ```
- 0     1     2           4           6           8          10           12
- +-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+
- |   MAGIC   |flag |     |                     id                        |
- +-----------+-----------+-----------+-----------+-----------+-----------+
- |     body length       |                      body                     |
- +-----------------------+                                               +
- |                               ... ...                                 |
- +-----------------------------------------------------------------------+
+ 0      1      2             4             6             8            10            12
+ +------+------+------+------+------+------+------+------+------+------+------+------+
+ |    MAGIC    | flag |status|                        packet id                      |
+ +-------------+-------------+-------------+-------------+-------------+-------------+
+ |        body length        |                          body                         |
+ +---------------------------+                                                       +
+ |                                     ... ...                                       |
+ +-----------------------------------------------------------------------------------+
+```
+
+- Dubbo Request Packet
+
+```
+ 0      1      2             4             6             8            10            12
+ +------+------+------+------+------+------+------+------+------+------+------+------+
+ |    MAGIC    | flag |      |                        packet id                      |
+ +-------------+-------------+-----------------+-------------------+-----------------+
+ |        body length        |  dubbo version  |   service path    | service version |
+ +---------------+-----------+-----------+-----+-------------------+-----------------+
+ |  method name  | arguments description |                                           |
+ +---------------+-----------------------+                arguments                  +
+ |                                        ...  ...                                   |
+ +-----------------------------------------------------------------------------------+
+ |                                   attachments                                     |
+ +-----------------------------------------------------------------------------------+
+```
+
+- Dubbo Response Packet
+
+packet status ok
+```
+ 0      1      2             4             6             8            10            12
+ +------+------+------+------+------+------+------+------+------+------+------+------+
+ |    MAGIC    | flag |status|                        packet id                      |
+ +-------------+-------------+---------------------------+---------------------------+
+ |        body length        |        result flag        |                           |
+ +---------------------------+---------------------------+                           +
+ |                             result or exception ...                               |
+ +-----------------------------------------------------------------------------------+
+```
+
+packet status not ok
+```
+ 0      1      2             4             6             8            10            12
+ +------+------+------+------+------+------+------+------+------+------+------+------+
+ |    MAGIC    | flag |status|                        packet id                      |
+ +-------------+-------------+---------------------------+---------------------------+
+ |        body length        |                   error message                       |
+ +---------------------------+-------------------------------------------------------+
 ```
 
 ## Install
@@ -44,7 +87,7 @@ $ npm install dubbo-remoting --save
 
 ## API
 
-- `decode(url)`
+- `decoder(url)` get decoder of the connection with certain url
   - @param {String} connection url
   - @return {DubboDecoder}
 
@@ -52,7 +95,7 @@ $ npm install dubbo-remoting --save
   const net = require('net');
   const protocol = require('dubbo-remoting');
   const url = 'dubbo://127.0.0.0:12200/com.xxx.DemoService?_TIMEOUT=2000&_p=4&application=xx&default.service.filter=dragoon&dubbo=2.6.1&interface=com.xxx.DemoService&methods=sayHello&pid=25381&revision=2.6.1&side=provider&threads=300&timeout=2000&timestamp=1487081081346&v=2.0&version=1.0.0';
-  const decoder = protocol.decode()
+  const decoder = protocol.decoder(url)
   
   const socket = net.connect(12200, '127.0.0.1');
   socket.pipe(decoder);

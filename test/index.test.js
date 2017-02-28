@@ -12,23 +12,23 @@ const decode = require('../lib/protocol/dubbo').decode;
 describe('test/index.test.js', () => {
   describe('exchange', () => {
     it('should create decoder ok', () => {
-      let decoder = protocol.decode('dubbo://127.0.0.1');
+      let decoder = protocol.decoder('dubbo://127.0.0.1');
       assert(decoder);
       assert(decoder instanceof stream.Writable);
       decoder.end();
-      decoder = protocol.decode('exchange://127.0.0.1');
+      decoder = protocol.decoder('exchange://127.0.0.1');
       assert(decoder);
       decoder.end();
     });
 
     it('should create decoder failed', () => {
       assert.throws(() => {
-        protocol.decode('xxx://127.0.0.1');
+        protocol.decoder('xxx://127.0.0.1');
       }, '[dubbo-remoting] unsupport protocol => xxx');
     });
 
     it('should decode single packet ok', done => {
-      const decoder = protocol.decode('exchange://127.0.0.1');
+      const decoder = protocol.decoder('exchange://127.0.0.1');
       decoder.on('packet', packet => {
         assert(packet.id === 1);
         assert(packet.version === '2.0.0');
@@ -50,7 +50,7 @@ describe('test/index.test.js', () => {
 
     it('should decode multiple packets ok', done => {
       done = pedding(done, 2);
-      const decoder = protocol.decode('exchange://127.0.0.1');
+      const decoder = protocol.decoder('exchange://127.0.0.1');
       decoder.on('packet', packet => {
         if (packet.id === 1) {
           assert.deepEqual(packet.data, {
@@ -80,7 +80,7 @@ describe('test/index.test.js', () => {
           callback(null, chunk);
         },
       });
-      const decoder = protocol.decode('exchange://127.0.0.1');
+      const decoder = protocol.decoder('exchange://127.0.0.1');
       decoder.on('packet', packet => {
         assert(packet.id === 1);
         assert(packet.version === '2.0.0');
@@ -116,7 +116,7 @@ describe('test/index.test.js', () => {
           callback(null, chunk);
         },
       });
-      const decoder = protocol.decode('exchange://127.0.0.1');
+      const decoder = protocol.decoder('exchange://127.0.0.1');
       decoder.on('error', err => {
         assert(err && err.message === '[dubbo-remoting] invalid packet with magic => 102');
         done();

@@ -1,273 +1,262 @@
 'use strict';
 
-const is = require('is-type-of');
-const stream = require('stream');
-const utils = require('./utils');
-const assert = require('assert');
 const protocol = require('../');
-const pedding = require('pedding');
-const utility = require('utility');
-const decode = require('../lib/protocol/dubbo').decode;
+const assert = require('assert');
+const urlparse = require('url').parse;
+const awaitEvent = require('await-event');
+const PassThrough = require('stream').PassThrough;
 
 describe('test/index.test.js', () => {
-  describe('exchange', () => {
-    it('should create decoder ok', () => {
-      let decoder = protocol.decoder('dubbo://127.0.0.1');
-      assert(decoder);
-      assert(decoder instanceof stream.Writable);
-      decoder.end();
-      decoder = protocol.decoder('exchange://127.0.0.1');
-      assert(decoder);
-      decoder.end();
-    });
 
-    it('should create decoder failed', () => {
-      assert.throws(() => {
-        protocol.decoder('xxx://127.0.0.1');
-      }, '[dubbo-remoting] unsupport protocol => xxx');
-    });
+  it('should create encoder ok', () => {
+    const sentReqs = new Map();
+    const address = urlparse('dubbo://127.0.0.1:12200?serialization=hessian', true);
+    let encoder = protocol.encoder({ address, sentReqs });
+    assert(encoder.protocolType === 'dubbo');
+    assert(encoder.codecType === 'hessian');
 
-    it('should decode single packet ok', done => {
-      const decoder = protocol.decoder('exchange://127.0.0.1');
-      decoder.on('packet', packet => {
-        assert(packet.id === 1);
-        assert(packet.version === '2.0.0');
-        assert(packet.isTwoWay);
-        assert(!packet.isEvent);
-        assert(!packet.isBroken);
-        assert.deepEqual(packet.data, {
-          login: {
-            application: 'xxx',
-            dubbo: '2.5.3',
-            password: null,
-            username: null,
-          },
-        });
-        done();
-      });
-      utils.createReadStream('login').pipe(decoder);
-    });
+    encoder = protocol.encoder({ sentReqs });
+    assert(encoder.protocolType === 'dubbo');
+    assert(encoder.codecType === 'hessian2');
 
-    it('should decode multiple packets ok', done => {
-      done = pedding(done, 2);
-      const decoder = protocol.decoder('exchange://127.0.0.1');
-      decoder.on('packet', packet => {
-        if (packet.id === 1) {
-          assert.deepEqual(packet.data, {
-            login: {
-              application: 'xxx',
-              dubbo: '2.5.3',
-              password: null,
-              username: null,
-            },
-          });
-        } else if (packet.id === 2) {
-          assert.deepEqual(packet.data, {
-            register: 'consumer://127.0.0.1?application=test&dubbo=2.5.3&check=false&pid=90972&protocol=dubbo&revision=1.0.0&timestamp=1487836024465&category=consumer&methods=*&side=consumer&interface=com.gxc.demo.DemoService&version=1.0.0',
-          });
-        } else {
-          done(new Error(`error packet id => ${packet.id}`));
-        }
-        done();
-      });
-      utils.createReadStream('multiple').pipe(decoder);
-    });
+    encoder = protocol.encoder({ sentReqs, codecType: 'protobuf' });
+    assert(encoder.protocolType === 'dubbo');
+    assert(encoder.codecType === 'protobuf');
 
-    it('should work with partial data', done => {
-      const socket = new stream.Transform({
-        writableObjectMode: true,
-        transform(chunk, encoding, callback) {
-          callback(null, chunk);
-        },
-      });
-      const decoder = protocol.decoder('exchange://127.0.0.1');
-      decoder.on('packet', packet => {
-        assert(packet.id === 1);
-        assert(packet.version === '2.0.0');
-        assert(packet.isTwoWay);
-        assert(!packet.isEvent);
-        assert(!packet.isBroken);
-        assert.deepEqual(packet.data, {
-          login: {
-            application: 'xxx',
-            dubbo: '2.5.3',
-            password: null,
-            username: null,
-          },
-        });
-        done();
-      });
-      socket.pipe(decoder);
-      const buf = utils.bytes('login');
-      const length = buf.length;
-      const index = utility.random(length);
-
-      socket.write(buf.slice(0, index));
-
-      setTimeout(() => {
-        socket.write(buf.slice(index, length));
-      }, 1000);
-    });
-
-    it('should emit error if decode failed', done => {
-      const socket = new stream.Transform({
-        writableObjectMode: true,
-        transform(chunk, encoding, callback) {
-          callback(null, chunk);
-        },
-      });
-      const decoder = protocol.decoder('exchange://127.0.0.1');
-      decoder.on('error', err => {
-        assert(err && err.message === '[dubbo-remoting] invalid packet with magic => 102');
-        done();
-      });
-      socket.pipe(decoder);
-      socket.write(new Buffer('fake data'));
-    });
-
-    it('should auto generate id', () => {
-      const req = new protocol.Request();
-      assert(is.number(req.id));
-    });
+    encoder.codecType = 'hessian2';
+    assert(encoder.codecType === 'hessian2');
   });
 
-  describe('dubbo', () => {
-    it('should encode & decode dubbo request', () => {
-      const req = new protocol.Request(1);
-      req.data = new protocol.Invocation({
-        methodName: 'test-method',
-        args: [
-          1, true, 1.1, new Date(1487940805137), new Buffer('buffer'), [ 1, 2, 3 ], { a: 'a' },
-        ],
-        attachments: {
-          dubbo: '5.3.0',
-          path: 'com.test.TestService',
-          version: '1.0.0',
+  const reqSample = {
+    args: [ 1, 2 ],
+    serverSignature: 'com.alipay.test.TestService:1.0',
+    methodName: 'plus',
+    requestProps: {
+      foo: 'bar',
+    },
+    timeout: 3000,
+  };
+  const resSample = {
+    isError: false,
+    errorMsg: null,
+    appResponse: {
+      $class: 'java.lang.Integer',
+      $: 3,
+    },
+  };
+
+  it('should encode request', async function() {
+    const codecType = 'hessian2';
+    const protocolType = 'dubbo';
+    const address = urlparse('dubbo://127.0.0.1:12200?serialization=hessian2');
+    const sentReqs = new Map();
+    const socket = new PassThrough();
+    const encoder = protocol.encoder({ sentReqs, address });
+    const decoder = protocol.decoder({ sentReqs });
+    encoder.pipe(socket).pipe(decoder);
+
+    setImmediate(() => {
+      encoder.writeRequest(1, Object.assign({}, reqSample));
+    });
+
+    let req = await awaitEvent(decoder, 'request');
+    assert(req.packetId === 1);
+    assert(req.packetType === 'request');
+    assert(req.data && req.data.methodName === reqSample.methodName);
+    assert(req.data.serverSignature === reqSample.serverSignature);
+    assert.deepEqual(req.data.args, reqSample.args);
+    assert.deepEqual(req.data.requestProps, { dubbo: '5.3.0', path: 'com.alipay.test.TestService', version: '1.0', foo: 'bar' });
+    assert(req.options && req.options.protocolType === protocolType);
+    assert(req.options.codecType === codecType);
+    assert(req.meta);
+    assert(req.meta.size > 0);
+    assert(req.meta.start > 0);
+    assert(req.meta.rt >= 0);
+
+    setImmediate(() => {
+      encoder.writeRequest(2, Object.assign({}, reqSample));
+    });
+
+    req = await awaitEvent(decoder, 'request');
+    assert(req.packetId === 2);
+    assert(req.packetType === 'request');
+    assert(req.data && req.data.methodName === reqSample.methodName);
+    assert(req.data.serverSignature === reqSample.serverSignature);
+    assert.deepEqual(req.data.args, reqSample.args);
+    assert.deepEqual(req.data.requestProps, { dubbo: '5.3.0', path: 'com.alipay.test.TestService', version: '1.0', foo: 'bar' });
+    assert(req.options && req.options.protocolType === protocolType);
+    assert(req.options.codecType === codecType);
+    assert(req.meta);
+    assert(req.meta.size > 0);
+    assert(req.meta.start > 0);
+    assert(req.meta.rt >= 0);
+
+    setImmediate(() => {
+      encoder.writeResponse(req, resSample);
+    });
+
+    const res = await awaitEvent(decoder, 'response');
+    assert(res.packetId === 2);
+    assert(res.packetType === 'response');
+    assert.deepEqual(res.data, { error: null, appResponse: 3 });
+    assert(res.options && res.options.protocolType === protocolType);
+    assert(res.options.codecType === codecType);
+    assert(res.meta);
+    assert(res.meta.size > 0);
+    assert(res.meta.start > 0);
+    assert(res.meta.rt >= 0);
+  });
+
+  it('should encode error response', async function() {
+    const codecType = 'hessian2';
+    const protocolType = 'dubbo';
+    const address = urlparse('dubbo://127.0.0.1:12200?serialization=hessian2');
+    const sentReqs = new Map();
+    const socket = new PassThrough();
+    const encoder = protocol.encoder({ sentReqs, address });
+    const decoder = protocol.decoder({ sentReqs });
+    encoder.pipe(socket).pipe(decoder);
+
+    setImmediate(() => {
+      encoder.writeRequest(1, {
+        args: [ 1, 2 ],
+        serverSignature: 'com.alipay.test.TestService:1.0',
+        methodName: 'plus',
+        requestProps: null,
+        timeout: 3000,
+      }, err => {
+        err && console.log(err);
+      });
+    });
+
+    const req = await awaitEvent(decoder, 'request');
+
+    setImmediate(() => {
+      encoder.writeResponse(req, {
+        isError: true,
+        errorMsg: 'mock error message',
+        appResponse: null,
+      });
+    });
+    let res = await awaitEvent(decoder, 'response');
+
+    assert(res.packetId === 1);
+    assert(res.packetType === 'response');
+    assert(res.options && res.options.protocolType === protocolType);
+    assert(res.options.codecType === codecType);
+    assert(res.data && res.data.error);
+    assert(!res.data.appResponse);
+    assert(res.data.error.message.includes('mock error message'));
+
+    req.options.protocolType = 'dubbo';
+    req.options.codecType = 'hessian2';
+
+    setImmediate(() => {
+      encoder.writeResponse(req, {
+        isError: true,
+        errorMsg: 'xxx error',
+        appResponse: null,
+      });
+    });
+    res = await awaitEvent(decoder, 'response');
+    assert(res.packetId === 1);
+    assert(res.packetType === 'response');
+    assert(res.options && res.options.protocolType === 'dubbo');
+    assert(res.options.codecType === 'hessian2');
+    assert(res.data && res.data.error);
+    assert(!res.data.appResponse);
+    assert(res.data.error.message.includes('xxx error'));
+
+    setImmediate(() => {
+      encoder.writeResponse(req, {
+        isError: true,
+        errorMsg: null,
+        appResponse: null,
+      });
+    });
+    res = await awaitEvent(decoder, 'response');
+    assert(res.packetId === 1);
+    assert(res.packetType === 'response');
+    assert(res.options && res.options.protocolType === 'dubbo');
+    assert(res.options.codecType === 'hessian2');
+    assert(res.data && res.data.error);
+    assert(!res.data.appResponse);
+    assert(res.data.error.message.includes('Exception caught in invocation'));
+  });
+
+  it('should encode biz error response', async function() {
+    const codecType = 'hessian2';
+    const protocolType = 'dubbo';
+    const address = urlparse('dubbo://127.0.0.1:12200?serialization=hessian2');
+    const sentReqs = new Map();
+    const socket = new PassThrough();
+    const encoder = protocol.encoder({ sentReqs, address });
+    const decoder = protocol.decoder({ sentReqs });
+    encoder.pipe(socket).pipe(decoder);
+
+    setImmediate(() => {
+      encoder.writeRequest(1, {
+        args: [ 1, 2 ],
+        serverSignature: 'com.alipay.test.TestService:1.0',
+        methodName: 'plus',
+        requestProps: null,
+        uniformContextHeaders: null,
+        timeout: 3000,
+      });
+    });
+    const req = await awaitEvent(decoder, 'request');
+
+    setImmediate(() => {
+      encoder.writeResponse(req, {
+        isError: false,
+        errorMsg: null,
+        appResponse: {
+          $class: 'java.lang.Exception',
+          $: new Error('mock error'),
         },
       });
-      assert(!req.isResponse);
-      const buf = req.encode();
-      assert.deepEqual(buf, utils.bytes('dubbo_req'));
-      const result = decode(buf);
-      assert(result.total === buf.length);
-      assert.deepEqual(result.packet, req);
     });
+    const res = await awaitEvent(decoder, 'response');
 
-    it('should encode & decode java class', () => {
-      const req = new protocol.Request(1);
-      req.data = new protocol.Invocation({
-        methodName: 'test-method',
-        args: [{
-          $class: 'com.test.TestClass',
-          $: {
-            a: 1,
-            b: 'str',
-            c: true,
-            d: [ 'a', 'b', 'c' ],
-            e: { foo: 'bar' },
-          },
-        }],
-        attachments: {
-          dubbo: '5.3.0',
-          path: 'com.test.TestService',
-          version: '1.0.0',
-        },
-      });
-      const buf = req.encode();
-      assert.deepEqual(buf, utils.bytes('dubbo_req_java_class'));
-      const result = decode(buf);
-      assert(result.total === buf.length);
-      assert(result.packet.id === 1);
-      const inv = result.packet.data;
-      assert(inv.methodName === 'test-method');
-      assert.deepEqual(inv.attachments, {
-        dubbo: '5.3.0',
-        path: 'com.test.TestService',
-        version: '1.0.0',
-      });
-      assert.deepEqual(inv.args, [{
-        a: 1,
-        b: 'str',
-        c: true,
-        d: [ 'a', 'b', 'c' ],
-        e: { foo: 'bar' },
-      }]);
-    });
-
-    it('should encode & decode dubbo response', () => {
-      const res = new protocol.Response(1);
-      res.data = new protocol.Result({ value: 1.22 });
-      assert(res.isSuccess);
-      assert(res.isResponse);
-      assert(!res.event);
-      const buf = res.encode();
-      assert.deepEqual(buf, utils.bytes('dubbo_res'));
-      const result = decode(buf);
-      assert(result.total === buf.length);
-      assert.deepEqual(result.packet, res);
-    });
-
-    it('should encode & decode dubbo exception response', () => {
-      const res = new protocol.Response(1);
-      res.data = new protocol.Result({ error: new Error('mock error') });
-      assert(res.isResponse);
-      const buf = res.encode();
-      const result = decode(buf);
-      assert(result.total === buf.length);
-      assert(result.packet.data.value == null);
-      assert(result.packet.data.error instanceof Error);
-      assert(result.packet.data.error.message.includes('mock error'));
-    });
-
-    it('should encode & decode return value => null', () => {
-      const res = new protocol.Response(1);
-      res.data = new protocol.Result({ value: null });
-      assert(res.isResponse);
-      const buf = res.encode();
-      assert.deepEqual(buf, utils.bytes('dubbo_res_with_null'));
-      const result = decode(buf);
-      assert(result.total === buf.length);
-      assert.deepEqual(result.packet, res);
-    });
-
-    it('should encode & decode packet with sys err', () => {
-      const res = new protocol.Response(1);
-      res.status = 70;
-      res.errorMsg = 'sys error';
-      assert(res.isResponse);
-      const buf = res.encode();
-      assert.deepEqual(buf, utils.bytes('dubbo_res_with_sys_error'));
-      const result = decode(buf);
-      assert(result.total === buf.length);
-      assert.deepEqual(result.packet, res);
-    });
+    assert(res.packetId === 1);
+    assert(res.packetType === 'response');
+    assert(res.options && res.options.protocolType === protocolType);
+    assert(res.options.codecType === codecType);
+    assert(res.data && res.data.error);
+    assert(!res.data.appResponse);
+    assert(res.data.error.message.includes('mock error'));
   });
 
   describe('heartbeat', () => {
-    it('should decode & encode heartbeat req', () => {
-      const req = new protocol.Request(1);
-      req.event = null;
-      assert(!req.isResponse);
-      assert(req.isHeartbeat);
-      assert(req.event == null);
-      const buf = req.encode();
-      assert.deepEqual(buf, utils.bytes('heartbeat_req'));
-      const result = decode(buf);
-      assert(result.total === buf.length);
-      assert.deepEqual(result.packet, req);
-    });
+    it('should encode heartbeat', async function() {
+      const codecType = 'hessian2';
+      const protocolType = 'dubbo';
+      const address = urlparse('dubbo://127.0.0.1:12200?serialization=hessian2');
+      const sentReqs = new Map();
+      const socket = new PassThrough();
+      const encoder = protocol.encoder({ sentReqs, address });
+      const decoder = protocol.decoder({ sentReqs });
+      encoder.pipe(socket).pipe(decoder);
 
-    it('should decode & encode heartbeat res', () => {
-      const res = new protocol.Response(1);
-      res.event = null;
-      assert(res.isResponse);
-      assert(res.isHeartbeat);
-      assert(res.event == null);
-      const buf = res.encode();
-      assert.deepEqual(buf, utils.bytes('heartbeat_res'));
-      const result = decode(buf);
-      assert(result.total === buf.length);
-      assert.deepEqual(result.packet, res);
+      setImmediate(() => {
+        encoder.writeHeartbeat(1, { clientUrl: 'xxx' });
+      });
+      const hb = await awaitEvent(decoder, 'heartbeat');
+
+      assert(hb.packetId === 1);
+      assert(hb.packetType === 'heartbeat');
+      assert(hb.options && hb.options.protocolType === protocolType);
+      assert(hb.options.codecType === codecType);
+
+      setImmediate(() => {
+        encoder.writeHeartbeatAck(hb);
+      });
+
+      const hbAck = await awaitEvent(decoder, 'heartbeat_ack');
+      assert(hbAck.packetId === 1);
+      assert(hbAck.packetType === 'heartbeat_ack');
+      assert(hbAck.options && hbAck.options.protocolType === protocolType);
+      assert(hbAck.options.codecType === codecType);
     });
   });
 });

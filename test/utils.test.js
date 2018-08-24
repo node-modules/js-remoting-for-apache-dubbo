@@ -51,6 +51,6 @@ describe('test/utils.test.js', () => {
     assert.deepEqual(utils.desc2classArray('S'), [ 'short' ]);
     assert.throws(() => {
       utils.desc2classArray('A');
-    }, '[double-remoting] unknown class type => A');
+    }, /\[double-remoting\] unknown class type => A/);
   });
 });

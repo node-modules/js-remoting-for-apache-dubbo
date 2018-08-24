@@ -85,49 +85,96 @@ packet status not ok
 $ npm install dubbo-remoting --save
 ```
 
-## API
+## Usage
 
-- `decoder(url)` get decoder of the connection with certain url
-  - @param {String} connection url
-  - @return {DubboDecoder}
+You can use this dubbo protocol implementation with the [sofa-rpc-node](https://github.com/alipay/sofa-rpc-node)
 
-  ```js
-  const net = require('net');
-  const protocol = require('dubbo-remoting');
-  const url = 'dubbo://127.0.0.0:12200/com.xxx.DemoService?_TIMEOUT=2000&_p=4&application=xx&default.service.filter=dragoon&dubbo=2.6.1&interface=com.xxx.DemoService&methods=sayHello&pid=25381&revision=2.6.1&side=provider&threads=300&timeout=2000&timestamp=1487081081346&v=2.0&version=1.0.0';
-  const decoder = protocol.decoder(url)
-  
-  const socket = net.connect(12200, '127.0.0.1');
-  socket.pipe(decoder);
-  
-  decoder.on('packet', p => {
-    console.log('packet', p);
-  });
-  socket.on('connect', () => {
-    console.log('connected');
-  });
-  socket.on('error', err => {
-    console.error('err', err);
-  });
+### 1. Install & Launch zk
 
-  const Request = protocol.Request;
-  const Invocation = protocol.Invocation;
-  const req = new Request();
-  req.data = new Invocation({
-    methodName: 'sayHello',
-    args: ['zongyu'],
-    attachments: {
-      path: 'com.xxx.DemoService',
-      interface: 'com.xxx.DemoService',
-      version: '1.0.0',
-      timeout: 2000,
-    },
-  });
-  socket.write(req.encode());
-  ```
+```bash
+$ brew install zookeeper
 
-- `DubboDecoder` an writable stream, your can pipe socket to it
-- `Request` the Dubbo request
-- `Invocation` the abstraction of the Dubbo service invocation
-- `Response` the Dubbo response
-- `Result` the abstraction of the Dubbo service result
+$ zkServer start
+ZooKeeper JMX enabled by default
+Using config: /usr/local/etc/zookeeper/zoo.cfg
+Starting zookeeper ... STARTED
+```
+
+### 2. Expose a dubbo service
+
+```js
+'use strict';
+
+const { RpcServer } = require('sofa-rpc-node').server;
+const { ZookeeperRegistry } = require('sofa-rpc-node').registry;
+const protocol = require('dubbo-remoting');
+
+const logger = console;
+
+// 1. create zk registry client
+const registry = new ZookeeperRegistry({
+  logger,
+  address: '127.0.0.1:2181',
+});
+
+// 2. create rpc server
+const server = new RpcServer({
+  logger,
+  registry,
+  port: 12200,
+  protocol,
+});
+
+// 3. add service
+server.addService({
+  interfaceName: 'com.nodejs.test.TestService',
+}, {
+  async plus(a, b) {
+    return a + b;
+  },
+});
+
+// 4. launch the server
+server.start()
+  .then(() => {
+    server.publish();
+  });
+```
+
+### 3. Call the dubbo service
+
+```js
+'use strict';
+
+const { RpcClient } = require('sofa-rpc-node').client;
+const { ZookeeperRegistry } = require('sofa-rpc-node').registry;
+const protocol = require('dubbo-remoting');
+const logger = console;
+
+// 1. create zk registry client
+const registry = new ZookeeperRegistry({
+  logger,
+  address: '127.0.0.1:2181',
+});
+
+async function invoke() {
+  // 2. create rpc client with dubbo protocol
+  const client = new RpcClient({
+    logger,
+    registry,
+    protocol,
+  });
+  // 3. create rpc service consumer
+  const consumer = client.createConsumer({
+    interfaceName: 'com.nodejs.test.TestService',
+  });
+  // 4. wait consumer ready
+  await consumer.ready();
+
+  // 5. call the service
+  const result = await consumer.invoke('plus', [1, 2], { responseTimeout: 3000 });
+  console.log('1 + 2 = ' + result);
+}
+
+invoke().catch(console.error);
+```

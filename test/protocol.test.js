@@ -52,7 +52,7 @@ describe('test/protocol.test.js', () => {
     assert.deepEqual({
       packetId: 1,
       packetType: 'response',
-      data: { appResponse: 'ok', error: null },
+      data: { appResponse: 'ok', error: null, responseProps: null },
       options: {
         protocolType: 'dubbo',
         codecType: 'hessian2',
@@ -162,5 +162,27 @@ describe('test/protocol.test.js', () => {
         classMap,
       },
     }, req);
+  });
+
+  it('should decode value with attachment', () => {
+    const buf = Buffer.from('dabb021400000000000000010000004994303848656c6c6f207a6f6e6779752c20726573706f6e73652066726f6d2070726f76696465723a203139322e3136382e39392e313a32303838304805647562626f05322e302e325a', 'hex');
+    const resp = protocol.decode(buf);
+
+    assert(resp.meta && resp.meta.size === 89);
+    delete resp.meta;
+    assert.deepEqual(resp, {
+      packetId: 1,
+      packetType: 'response',
+      data: {
+        appResponse: 'Hello zongyu, response from provider: 192.168.99.1:20880',
+        error: null,
+        responseProps: { dubbo: '2.0.2' },
+      },
+      options: {
+        protocolType: 'dubbo',
+        codecType: 'hessian2',
+        classMap: undefined,
+      },
+    });
   });
 });

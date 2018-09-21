@@ -98,7 +98,7 @@ describe('test/index.test.js', () => {
     const res = await awaitEvent(decoder, 'response');
     assert(res.packetId === 2);
     assert(res.packetType === 'response');
-    assert.deepEqual(res.data, { error: null, appResponse: 3 });
+    assert.deepEqual(res.data, { error: null, appResponse: 3, responseProps: null });
     assert(res.options && res.options.protocolType === protocolType);
     assert(res.options.codecType === codecType);
     assert(res.meta);

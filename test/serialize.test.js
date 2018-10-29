@@ -61,9 +61,9 @@ describe('test/serialize.test.js', () => {
 
     it('should readBytes & writeBytes ok', () => {
       const output = serialization.getSerializationById('2').serialize();
-      output.writeBytes(new Buffer('hello buffer'));
+      output.writeBytes(Buffer.from('hello buffer'));
       const input = serialization.getSerializationById('2').deserialize(output.get());
-      assert.deepEqual(input.readBytes(), new Buffer('hello buffer'));
+      assert.deepEqual(input.readBytes(), Buffer.from('hello buffer'));
     });
   });
 });

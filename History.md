@@ -1,4 +1,10 @@
 
+2.1.2 / 2018-10-30
+==================
+
+**fixes**
+  * [[`3ce2c93`](http://github.com/dubbo-js/dubbo-remoting/commit/3ce2c930b325d89f976c43ac0906f6a9a579537b)] - fix: encode enum defaultValue issue & list generic issue (gxcsoccer <<gxcsoccer@126.com>>)
+
 2.1.1 / 2018-10-30
 ==================
 

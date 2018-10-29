@@ -1,6 +1,6 @@
 {
   "name": "dubbo-remoting",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "description": "dubbo remoting nodejs implement",
   "main": "lib/index.js",
   "files": [

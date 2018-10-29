@@ -32,9 +32,9 @@
   "homepage": "https://github.com/dubbo-js/dubbo-remoting#readme",
   "dependencies": {
     "@protobufjs/codegen": "^2.0.4",
-    "debug": "^4.0.1",
+    "debug": "^4.1.0",
     "hessian.js": "^2.8.1",
-    "is-type-of": "^1.2.0",
+    "is-type-of": "^1.2.1",
     "long": "^4.0.0",
     "utility": "^1.15.0"
   },
@@ -44,11 +44,11 @@
     "beautify-benchmark": "^0.2.4",
     "benchmark": "^2.1.4",
     "egg-bin": "^4.9.0",
-    "egg-ci": "^1.9.1",
-    "eslint": "^5.6.0",
+    "egg-ci": "^1.10.0",
+    "eslint": "^5.8.0",
     "eslint-config-egg": "^7.1.0",
     "js-to-java": "^2.6.0",
-    "sofa-rpc-node": "^1.2.1"
+    "sofa-rpc-node": "^1.4.0"
   },
   "engines": {
     "node": ">= 8.0.0"

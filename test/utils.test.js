@@ -7,7 +7,7 @@ describe('test/utils.test.js', () => {
   it('should getJavaArgsDesc & desc2classArray ok', () => {
     const desc = utils.getJavaArgsDesc([
       1, 1.22, 'a', true, null, undefined, 12323123123123,
-      new Error('error'), new Date(), new Buffer('buffer'),
+      new Error('error'), new Date(), Buffer.from('buffer'),
       { foo: 'bar' }, {
         $class: 'testClass',
         $: {},

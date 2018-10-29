@@ -107,6 +107,43 @@ describe('test/index.test.js', () => {
     assert(res.meta.rt >= 0);
   });
 
+  it('should encode request without version', async function() {
+    const codecType = 'hessian2';
+    const protocolType = 'dubbo';
+    const address = urlparse('dubbo://127.0.0.1:12200?serialization=hessian2');
+    const sentReqs = new Map();
+    const socket = new PassThrough();
+    const encoder = protocol.encoder({ sentReqs, address });
+    const decoder = protocol.decoder({ sentReqs });
+    encoder.pipe(socket).pipe(decoder);
+
+    setImmediate(() => {
+      encoder.writeRequest(1, Object.assign({}, {
+        args: [ 1, 2 ],
+        serverSignature: 'com.alipay.test.TestService',
+        methodName: 'plus',
+        requestProps: {
+          foo: 'bar',
+        },
+        timeout: 3000,
+      }));
+    });
+
+    const req = await awaitEvent(decoder, 'request');
+    assert(req.packetId === 1);
+    assert(req.packetType === 'request');
+    assert(req.data && req.data.methodName === reqSample.methodName);
+    assert(req.data.serverSignature === 'com.alipay.test.TestService');
+    assert.deepEqual(req.data.args, reqSample.args);
+    assert.deepEqual(req.data.requestProps, { dubbo: '5.3.0', path: 'com.alipay.test.TestService', foo: 'bar' });
+    assert(req.options && req.options.protocolType === protocolType);
+    assert(req.options.codecType === codecType);
+    assert(req.meta);
+    assert(req.meta.size > 0);
+    assert(req.meta.start > 0);
+    assert(req.meta.rt >= 0);
+  });
+
   it('should encode error response', async function() {
     const codecType = 'hessian2';
     const protocolType = 'dubbo';

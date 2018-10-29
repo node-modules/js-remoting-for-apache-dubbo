@@ -1006,21 +1006,21 @@ describe('test/hessian.test.js', () => {
             testObj2: { name: 'xxx', finalField: 'xxx' },
             testEnum: { name: 'B' },
             testEnum2: [{ name: 'B' }, { name: 'C' }],
-            bs: new Buffer([ 0x02, 0x00, 0x01, 0x07 ]),
+            bs: Buffer.from([ 0x02, 0x00, 0x01, 0x07 ]),
             list1: [{ name: 'A' }, { name: 'B' }],
             list2: [ 2017, 2016 ],
             list3: [{ name: 'aaa', finalField: 'xxx' },
               { name: 'bbb', finalField: 'xxx' },
             ],
             list4: [ 'xxx', 'yyy' ],
-            list5: [ new Buffer([ 0x02, 0x00, 0x01, 0x07 ]), new Buffer([ 0x02, 0x00, 0x01, 0x06 ]) ],
+            list5: [ Buffer.from([ 0x02, 0x00, 0x01, 0x07 ]), Buffer.from([ 0x02, 0x00, 0x01, 0x06 ]) ],
             map1: { 2017: { name: 'B' } },
             map2: new Map([
               [ 2107, 2016 ],
             ]),
             map3: {},
             map4: { xxx: 'yyy' },
-            map5: { 2017: new Buffer([ 0x02, 0x00, 0x01, 0x06 ]) },
+            map5: { 2017: Buffer.from([ 0x02, 0x00, 0x01, 0x06 ]) },
           },
         };
 
@@ -1038,7 +1038,7 @@ describe('test/hessian.test.js', () => {
                 { $class: 'com.alipay.test.TestEnum', $: { name: 'C' } },
               ],
             },
-            bs: new Buffer([ 0x02, 0x00, 0x01, 0x07 ]),
+            bs: Buffer.from([ 0x02, 0x00, 0x01, 0x07 ]),
             list1: { $class: 'java.util.List', $: [{ $class: 'com.alipay.test.TestEnum', $: { name: 'A' } }, { $class: 'com.alipay.test.TestEnum', $: { name: 'B' } }] },
             list2: { $class: 'java.util.List', $: [{ $class: 'java.lang.Integer', $: 2017 }, { $class: 'java.lang.Integer', $: 2016 }] },
             list3: {
@@ -1052,7 +1052,7 @@ describe('test/hessian.test.js', () => {
             list5: {
               $class: 'java.util.List',
               $: [
-                new Buffer([ 0x02, 0x00, 0x01, 0x07 ]), new Buffer([ 0x02, 0x00, 0x01, 0x06 ]),
+                Buffer.from([ 0x02, 0x00, 0x01, 0x07 ]), Buffer.from([ 0x02, 0x00, 0x01, 0x06 ]),
               ],
             },
             map1: {
@@ -1069,7 +1069,7 @@ describe('test/hessian.test.js', () => {
             },
             map3: { $class: 'java.util.Map', $: {} },
             map4: { $class: 'java.util.Map', $: { xxx: { $class: 'java.lang.String', $: 'yyy' } } },
-            map5: { $class: 'java.util.Map', $: { 2017: new Buffer([ 0x02, 0x00, 0x01, 0x06 ]) } },
+            map5: { $class: 'java.util.Map', $: { 2017: Buffer.from([ 0x02, 0x00, 0x01, 0x06 ]) } },
           },
         };
         const buf1 = hessian.encode(converted, version);

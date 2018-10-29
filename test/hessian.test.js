@@ -6,6 +6,7 @@ const java = require('js-to-java');
 const hessian = require('hessian.js');
 const classMap = require('./fixtures/class_map');
 const { encoderV1, encoderV2 } = require('hessian.js');
+const utils = require('../lib/serialize/hessian/utils');
 const compile = require('../lib/serialize/hessian/compile');
 
 const versions = [ '1.0', '2.0' ];
@@ -807,6 +808,20 @@ describe('test/hessian.test.js', () => {
           assert.deepEqual(buf1, buf3);
         });
 
+        it('should encode array 2', () => {
+          const obj = {
+            $class: 'int',
+            $: [ 1, 2, 3 ],
+            isArray: true,
+          };
+          const buf1 = hessian.encode({ $class: '[int', $: [{ $class: 'int', $: 1 }, { $class: 'int', $: 2 }, { $class: 'int', $: 3 }] }, version);
+          const buf2 = encode(obj, version, {});
+          assert.deepEqual(buf1, buf2);
+
+          const buf3 = encode({ $class: '[int', $: [{ $class: 'int', $: 1 }, { $class: 'int', $: 2 }, { $class: 'int', $: 3 }] }, version, {});
+          assert.deepEqual(buf1, buf3);
+        });
+
         it('should encode multi-dimentional array', () => {
           const obj = {
             $class: 'java.lang.String',
@@ -1134,6 +1149,36 @@ describe('test/hessian.test.js', () => {
         const buf3 = encode(obj, version, classMap);
         assert.deepEqual(buf1, buf3);
       });
+
+      it('should handle same enum defaultValue', () => {
+        const buf1 = hessian.encode({
+          $class: 'com.sofa.TestObject',
+          $: {
+            oneEnum: { $class: 'com.sofa.OneEnum', $: { name: 'DEFAULT' } },
+            twoEnum: { $class: 'com.sofa.TwoEnum', $: { name: 'DEFAULT' } },
+          },
+        }, version);
+        const buf2 = encode({
+          $class: 'com.sofa.TestObject',
+          $: {},
+        }, version, classMap);
+        assert.deepEqual(buf1, buf2);
+      });
     });
+  });
+
+  it('should handle generic', () => {
+    const info = {
+      $class: 'java.util.List',
+      $: [],
+      generic: [{
+        type: 'java.util.List',
+        generic: [{ type: 'com.sofa.testObject' }],
+      }],
+    };
+    let id = utils.normalizeUniqId(info, '2.0');
+    assert(id === 'java.util.List#java.util.List#com.sofa.testObject#2.0');
+    id = utils.normalizeUniqId(info, '1.0');
+    assert(id === 'java.util.List#java.util.List#com.sofa.testObject#1.0');
   });
 });

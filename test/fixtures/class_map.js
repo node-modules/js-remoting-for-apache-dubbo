@@ -260,4 +260,17 @@ module.exports = {
       'typeAliasIndex': 0,
     },
   },
+
+  'com.sofa.TestObject': {
+    'oneEnum': {
+      'type': 'com.sofa.OneEnum',
+      'defaultValue': 'DEFAULT',
+      'isEnum': true,
+    },
+    'twoEnum': {
+      'type': 'com.sofa.TwoEnum',
+      'defaultValue': 'DEFAULT',
+      'isEnum': true,
+    },
+  },
 };

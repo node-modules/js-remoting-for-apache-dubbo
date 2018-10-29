@@ -1,4 +1,10 @@
 
+2.1.1 / 2018-10-30
+==================
+
+**fixes**
+  * [[`faa3136`](http://github.com/dubbo-js/dubbo-remoting/commit/faa31362a16e84385f28886537d2c81aab651b2c)] - fix: support no version service (gxcsoccer <<gxcsoccer@126.com>>)
+
 2.1.0 / 2018-09-21
 ==================
 

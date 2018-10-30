@@ -1,4 +1,10 @@
 
+2.1.3 / 2018-10-31
+==================
+
+**fixes**
+  * [[`5d24550`](http://github.com/dubbo-js/dubbo-remoting/commit/5d24550bf606719aff2e355a95dbbaace11fb7c2)] - fix: add group into request (gxcsoccer <<gxcsoccer@126.com>>)
+
 2.1.2 / 2018-10-30
 ==================
 

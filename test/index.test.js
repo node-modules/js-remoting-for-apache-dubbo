@@ -7,6 +7,9 @@ const awaitEvent = require('await-event');
 const PassThrough = require('stream').PassThrough;
 
 describe('test/index.test.js', () => {
+  it('should has name', () => {
+    assert(protocol.name === 'dubbo');
+  });
 
   it('should create encoder ok', () => {
     const sentReqs = new Map();
@@ -65,7 +68,7 @@ describe('test/index.test.js', () => {
     assert(req.data && req.data.methodName === reqSample.methodName);
     assert(req.data.serverSignature === reqSample.serverSignature);
     assert.deepEqual(req.data.args, reqSample.args);
-    assert.deepEqual(req.data.requestProps, { dubbo: '5.3.0', path: 'com.alipay.test.TestService', version: '1.0', foo: 'bar' });
+    assert.deepEqual(req.data.requestProps, { dubbo: '5.3.0', path: 'com.alipay.test.TestService', version: '1.0', foo: 'bar', group: '' });
     assert(req.options && req.options.protocolType === protocolType);
     assert(req.options.codecType === codecType);
     assert(req.meta);
@@ -83,7 +86,7 @@ describe('test/index.test.js', () => {
     assert(req.data && req.data.methodName === reqSample.methodName);
     assert(req.data.serverSignature === reqSample.serverSignature);
     assert.deepEqual(req.data.args, reqSample.args);
-    assert.deepEqual(req.data.requestProps, { dubbo: '5.3.0', path: 'com.alipay.test.TestService', version: '1.0', foo: 'bar' });
+    assert.deepEqual(req.data.requestProps, { dubbo: '5.3.0', path: 'com.alipay.test.TestService', version: '1.0', foo: 'bar', group: '' });
     assert(req.options && req.options.protocolType === protocolType);
     assert(req.options.codecType === codecType);
     assert(req.meta);
@@ -122,6 +125,7 @@ describe('test/index.test.js', () => {
         args: [ 1, 2 ],
         serverSignature: 'com.alipay.test.TestService',
         methodName: 'plus',
+        group: 'HSF',
         requestProps: {
           foo: 'bar',
         },
@@ -135,7 +139,7 @@ describe('test/index.test.js', () => {
     assert(req.data && req.data.methodName === reqSample.methodName);
     assert(req.data.serverSignature === 'com.alipay.test.TestService');
     assert.deepEqual(req.data.args, reqSample.args);
-    assert.deepEqual(req.data.requestProps, { dubbo: '5.3.0', path: 'com.alipay.test.TestService', foo: 'bar' });
+    assert.deepEqual(req.data.requestProps, { dubbo: '5.3.0', path: 'com.alipay.test.TestService', foo: 'bar', group: 'HSF' });
     assert(req.options && req.options.protocolType === protocolType);
     assert(req.options.codecType === codecType);
     assert(req.meta);

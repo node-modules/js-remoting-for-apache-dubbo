@@ -18,7 +18,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/dubbo-js/dubbo-remoting.git"
+    "url": "git+https://github.com/dubbo/dubbo-remoting-js.git"
   },
   "keywords": [
     "dubbo",
@@ -27,9 +27,9 @@
   "author": "gxcsoccer@126.com",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/dubbo-js/dubbo-remoting/issues"
+    "url": "https://github.com/dubbo/dubbo-remoting-js/issues"
   },
-  "homepage": "https://github.com/dubbo-js/dubbo-remoting#readme",
+  "homepage": "https://github.com/dubbo/dubbo-remoting-js#readme",
   "dependencies": {
     "@protobufjs/codegen": "^2.0.4",
     "debug": "^4.1.0",
@@ -45,10 +45,10 @@
     "benchmark": "^2.1.4",
     "egg-bin": "^4.9.0",
     "egg-ci": "^1.10.0",
-    "eslint": "^5.8.0",
+    "eslint": "^5.9.0",
     "eslint-config-egg": "^7.1.0",
     "js-to-java": "^2.6.0",
-    "sofa-rpc-node": "^1.4.0"
+    "sofa-rpc-node": "^1.6.0"
   },
   "engines": {
     "node": ">= 8.0.0"

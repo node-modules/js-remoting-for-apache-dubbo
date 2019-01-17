@@ -1,4 +1,13 @@
 
+2.1.4 / 2019-01-18
+==================
+
+**fixes**
+  * [[`e26b2cb`](http://github.com/dubbo/dubbo-remoting-js/commit/e26b2cbe364d8c35c6af7d755a0a2ce3dd5c6c01)] - fix: nested generic bug (gxcsoccer <<gxcsoccer@126.com>>)
+
+**others**
+  * [[`50d2b03`](http://github.com/dubbo/dubbo-remoting-js/commit/50d2b0309f273d08ed174a4124ef37e9416be320)] - chore: change license to apache v2 (gxcsoccer <<gxcsoccer@126.com>>)
+
 2.1.3 / 2018-10-31
 ==================
 

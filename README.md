@@ -1,4 +1,4 @@
-# dubbo-remoting
+# js-remoting-for-apache-dubbo
 dubbo remoting
 
 [![NPM version][npm-image]][npm-url]
@@ -8,22 +8,22 @@ dubbo remoting
 [![Known Vulnerabilities][snyk-image]][snyk-url]
 [![npm download][download-image]][download-url]
 
-[npm-image]: https://img.shields.io/npm/v/dubbo-remoting.svg?style=flat-square
-[npm-url]: https://npmjs.org/package/dubbo-remoting
-[travis-image]: https://img.shields.io/travis/dubbo-js/dubbo-remoting.svg?style=flat-square
-[travis-url]: https://travis-ci.org/dubbo-js/dubbo-remoting
-[codecov-image]: https://codecov.io/gh/dubbo-js/dubbo-remoting/branch/master/graph/badge.svg
-[codecov-url]: https://codecov.io/gh/dubbo-js/dubbo-remoting
-[david-image]: https://img.shields.io/david/dubbo-js/dubbo-remoting.svg?style=flat-square
-[david-url]: https://david-dm.org/dubbo-js/dubbo-remoting
-[snyk-image]: https://snyk.io/test/npm/dubbo-remoting/badge.svg?style=flat-square
-[snyk-url]: https://snyk.io/test/npm/dubbo-remoting
-[download-image]: https://img.shields.io/npm/dm/dubbo-remoting.svg?style=flat-square
-[download-url]: https://npmjs.org/package/dubbo-remoting
+[npm-image]: https://img.shields.io/npm/v/js-remoting-for-apache-dubbo.svg?style=flat-square
+[npm-url]: https://npmjs.org/package/js-remoting-for-apache-dubbo
+[travis-image]: https://img.shields.io/travis/dubbo/js-remoting-for-apache-dubbo.svg?style=flat-square
+[travis-url]: https://travis-ci.org/dubbo/js-remoting-for-apache-dubbo
+[codecov-image]: https://codecov.io/gh/dubbo/js-remoting-for-apache-dubbo/branch/master/graph/badge.svg
+[codecov-url]: https://codecov.io/gh/dubbo/js-remoting-for-apache-dubbo
+[david-image]: https://img.shields.io/david/dubbo/js-remoting-for-apache-dubbo.svg?style=flat-square
+[david-url]: https://david-dm.org/dubbo/js-remoting-for-apache-dubbo
+[snyk-image]: https://snyk.io/test/npm/js-remoting-for-apache-dubbo/badge.svg?style=flat-square
+[snyk-url]: https://snyk.io/test/npm/js-remoting-for-apache-dubbo
+[download-image]: https://img.shields.io/npm/dm/js-remoting-for-apache-dubbo.svg?style=flat-square
+[download-url]: https://npmjs.org/package/js-remoting-for-apache-dubbo
 
 ## Introduction
 
-[Dubbo](http://dubbo.io/) Protocol Nodejs Implement
+[Dubbo](http://dubbo.apache.org/en-us/) Protocol Nodejs Implement
 
 - Common Exchange Packet
 

@@ -1,6 +1,6 @@
 {
-  "name": "js-remoting-for-apache-dubbo",
-  "version": "1.0.0",
+  "name": "dubbo-remoting",
+  "version": "2.1.4",
   "description": "dubbo remoting nodejs implement",
   "main": "lib/index.js",
   "files": [
@@ -18,7 +18,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/dubbo/js-remoting-for-apache-dubbo.git"
+    "url": "git+https://github.com/node-modules/dubbo-remoting.git"
   },
   "keywords": [
     "dubbo",
@@ -27,9 +27,9 @@
   "author": "gxcsoccer@126.com",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/dubbo/js-remoting-for-apache-dubbo/issues"
+    "url": "https://github.com/node-modules/dubbo-remoting/issues"
   },
-  "homepage": "https://github.com/dubbo/js-remoting-for-apache-dubbo#readme",
+  "homepage": "https://github.com/node-modules/dubbo-remoting#readme",
   "dependencies": {
     "@protobufjs/codegen": "^2.0.4",
     "debug": "^4.1.1",
